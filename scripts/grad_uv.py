@@ -12,7 +12,6 @@ import argparse
 import numpy as np
 import torch
 import matplotlib
-import tqdm
 
 def grad_uv(train_matrix, test_matrix, k=25, lambda_parameters=0.1, device="cpu"):
 	num_steps = 2000
@@ -64,9 +63,9 @@ if __name__ == "__main__":
 	train_matrix = np.load(args.train_matrix_path).astype(np.float32)
 	test_matrix = np.load(args.test_matrix_path).astype(np.float32)
 
-	with open(args.log_path, "w") as f:
-		for k in [5, 10, 25, 30]:
-			for lam in [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1, 0.15, 0.2, 0.4]:
-				rmse = grad_uv(train_matrix=train_matrix, test_matrix=test_matrix, k=k, lambda_parameters=lam, device="cuda")
-				f.write("{} {} {}\n".format(k, lam, rmse))
-			
+	for k in [5, 10, 25, 30, 50, 100]:
+		for lam in [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1, 0.15, 0.2, 0.4]:
+			rmse = grad_uv(train_matrix=train_matrix, test_matrix=test_matrix, k=k, lambda_parameters=lam, device="cuda")
+			f = open(args.log_path, "a")
+			f.write("{} {} {}\n".format(k, lam, rmse))
+
