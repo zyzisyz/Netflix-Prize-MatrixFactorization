@@ -7,7 +7,7 @@
 #	> Created Time: Tue Dec  8 21:46:50 2020
 # ************************************************************************/
 
-stage=1
+stage=4
 
 if [ $stage -eq 1 ];then
 	time python -u scripts/data_preprocess.py \
@@ -38,5 +38,6 @@ fi
 if [ $stage -eq 4 ];then
 	time python -u scripts/plot.py \
 		--log-path log \
+		--png-path result.png \
 		--csv-path result.csv 
 fi
