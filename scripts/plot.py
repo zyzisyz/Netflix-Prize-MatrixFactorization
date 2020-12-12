@@ -46,6 +46,7 @@ if __name__ == "__main__":
 	plt.legend()
 	plt.ylabel("RMSE")
 	plt.xlabel("lambda")
+
 	plt.grid()
 	plt.show()
 
@@ -56,3 +57,4 @@ if __name__ == "__main__":
 		dataframe = pd.DataFrame({'k':data[0],'lambda':data[1], 'rmse':data[2]})
 		dataframe.to_csv(args.csv_path,index=False,sep=',')
 
+	plt.close()

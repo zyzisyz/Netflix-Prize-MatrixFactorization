@@ -20,17 +20,16 @@ def Collaborative_Filtering(train_matrix_path, test_marix_path, N):
 	train_matrix = np.load(train_matrix_path)
 	test_matrix = np.load(test_marix_path)
 
+
 	print(train_matrix.shape)
 	print(test_matrix.shape)
 
 	# cosine similarity
 	print("cosine_similarity in train matrix")
 	train_matrix_cos = cosine_similarity(train_matrix)
-	
-	# CF predict matrix
-	print("cf matrix predicting...")
 
-	cf_predict = np.dot(train_matrix_cos, train_matrix)/np.dot(train_matrix, np.ones_like(train_matrix,dtype=np.float64))
+	print("cf matrix predicting...")
+	cf_predict = np.dot(train_matrix_cos, train_matrix)/np.dot(train_matrix_cos, (train_matrix>0))
 
 	# root mean squared error
 	mask = (test_matrix>0).astype(cf_predict.dtype)

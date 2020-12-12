@@ -11,11 +11,11 @@
 import argparse
 import numpy as np
 import torch
-import matplotlib
+import matplotlib.pyplot as plt
 
 def grad_uv(train_matrix, test_matrix, k=25, lambda_parameters=0.1, device="cpu"):
-	num_steps = 2000
-	learning_rate = 0.00005
+	num_steps = 300
+	learning_rate = 0.00001
 	N = 1719446
 
 	A = (train_matrix>0).astype(train_matrix.dtype)
@@ -31,6 +31,9 @@ def grad_uv(train_matrix, test_matrix, k=25, lambda_parameters=0.1, device="cpu"
 	V = torch.rand((k,10000), dtype=torch.float32, device=device) * 0.001
 	V.requires_grad = True
 
+	x = []
+	y = []
+	z = []
 	for step in range(num_steps):
 		predict_matrix = torch.mm(U, V)
 		J = 0.5*torch.norm(A.mul(train_matrix-predict_matrix)).pow(2) \
@@ -50,7 +53,28 @@ def grad_uv(train_matrix, test_matrix, k=25, lambda_parameters=0.1, device="cpu"
 			res = min(res, rmse)
 		else:
 			res = rmse
-	return res
+		x.append(step+1)
+		y.append(J.item())
+		z.append(rmse.item())
+
+	plt.title("k={}\tlambda={}".format(k, lambda_parameters))
+	plt.figure(figsize=(15, 5))
+	plt.subplot(121)
+	plt.plot(x, y)
+	plt.grid()
+	plt.ylabel("J")
+	plt.xlabel("step")
+
+	plt.subplot(122)
+	plt.plot(x, z)
+	plt.grid()
+	plt.ylabel("RMSE")
+	plt.xlabel("step")
+
+	plt.savefig("k{}_lambda{}.png".format(k, lambda_parameters))
+	plt.close()
+
+	return res, y, z
 
 
 if __name__ == "__main__":
@@ -63,9 +87,30 @@ if __name__ == "__main__":
 	train_matrix = np.load(args.train_matrix_path).astype(np.float32)
 	test_matrix = np.load(args.test_matrix_path).astype(np.float32)
 
-	for k in [5, 10, 25, 30, 50, 100]:
-		for lam in [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1, 0.15, 0.2, 0.4]:
-			rmse = grad_uv(train_matrix=train_matrix, test_matrix=test_matrix, k=k, lambda_parameters=lam, device="cuda")
+	plt.figure(figsize=(15, 5))
+	x = [i+1 for i in range(100)]
+	#for k in [5, 10, 25, 30, 50, 100]:
+	for k in [50]:
+		#for lam in [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1, 0.15, 0.2, 0.4]:
+		for lam in [0.01]:
+			rmse, y, z = grad_uv(train_matrix=train_matrix, test_matrix=test_matrix, k=k, lambda_parameters=lam, device="cuda")
+			y = y
+			z = z
+			plt.subplot(121)
+			plt.plot(x, y, label="k = {}".format(k))
+			plt.grid()
+			plt.ylabel("J")
+			plt.xlabel("step")
+			plt.legend()
+
+			plt.subplot(122)
+			plt.plot(x, z, label="k = {}".format(k))
+			plt.grid()
+			plt.ylabel("RMSE")
+			plt.xlabel("step")
+			plt.legend()
+
 			f = open(args.log_path, "a")
 			f.write("{} {} {}\n".format(k, lam, rmse))
+	plt.savefig("loss.png")
 
